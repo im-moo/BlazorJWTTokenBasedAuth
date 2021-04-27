@@ -1,0 +1,60 @@
+﻿@page "/"
+
+@using BlazorSimpleApplications.Data  
+@using BlazorSimpleApplications.Components
+@inject HttpClient http
+<h1>BlazorSimpleApplications</h1>
+
+<div class="container">
+    <h3>Login Example in Blazor</h3>
+    <div class="form-group">
+        <label for="username">UserName</label>
+        <input type="text" name="username" placeholder="UserName" class="form-control" @bind="UserName" />
+    </div>
+    <div class="form-group">
+        <label for="password">Password</label>
+        <input type="text" name="password" placeholder="Password" class="form-control" @bind="Password" />
+    </div>
+    <button @onclick="@SubmitForm">Submit</button>
+    <br/>
+    <br/>
+    <textarea style="width: 100%; padding: 2px;">@Message</textarea>
+</div>
+
+<div class="row">
+    <div class="col-4">
+        <select @onchange="OnChange" class="custom-select">
+            <option value="@nameof(TextBoxComponent)">Text Box</option>
+            <option value="@nameof(CheckBoxComonent)">Check Box</option>
+            <option value="@nameof(RadioComponent)">Radio</option>
+        </select>
+        <br/>
+        <br/>
+        @*<DynamicComponent Type="selectedType"/>*@
+    </div>
+</div>
+
+@code
+{
+
+    public string UserName { get; set; } = "";
+    public string Password { get; set; } = "";
+    public string Message { get; set; } = "";
+    public string Token { get; set; } = "";
+
+    Type _selectedType = typeof(CheckBoxComonent);
+    //string _selectedValue = nameof(CheckBoxComonent);
+
+    private async Task SubmitForm()
+    {
+        var user = new User() {UserName = this.UserName, Password = this.Password};
+
+        var response = await http.PostJsonAsync<TokenClass>("https://localhost:44346/api/login", user);
+        Message = response.TokenOrMessage;
+    }
+
+    public void OnChange(ChangeEventArgs eventArgs)
+    {
+        _selectedType = Type.GetType($"BlazorDynamicComponent.Components.{eventArgs.Value}");
+    }
+}
